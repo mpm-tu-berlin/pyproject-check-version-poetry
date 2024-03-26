@@ -21,12 +21,12 @@ if __name__ == '__main__':
     with open(pyproject_toml_path, 'rb') as f:
         project = tomli.load(f)
 
-    project_version = version.parse(project['tool.poetry']['version'])
+    project_version = version.parse(project['tool']['poetry']['version'])
     is_test = False
     if test_regex:
         if re.compile(test_regex).search(str(project_version)):
             is_test = True
-    public_project_version = get_public_version(project['project']['name'], is_test)
+    public_project_version = get_public_version(project['tool']['poetry']['name'], is_test)
 
     with open(os.environ['GITHUB_OUTPUT'], 'at') as f:
         f.write(f"local_version_is_higher={str(project_version > public_project_version).lower()}\n")
