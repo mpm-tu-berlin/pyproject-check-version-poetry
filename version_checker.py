@@ -28,9 +28,15 @@ if __name__ == '__main__':
             is_test = True
     public_project_version = get_public_version(project['tool']['poetry']['name'], is_test)
 
+    if project_version > public_project_version:
+        return_code = 0
+    else:
+        return_code = 1
+    
     with open(os.environ['GITHUB_OUTPUT'], 'at') as f:
         f.write(f"local_version_is_higher={str(project_version > public_project_version).lower()}\n")
         f.write(f"local_version={str(project_version)}\n")
         f.write(f"public_version={str(public_project_version)}\n")
         f.write(f"is_test={str(is_test).lower()}\n")
 
+    sys.exit(return_code)
