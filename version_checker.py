@@ -21,7 +21,7 @@ if __name__ == '__main__':
     with open(pyproject_toml_path, 'rb') as f:
         project = tomli.load(f)
 
-    project_version = version.parse(project['project']['version'])
+    project_version = version.parse(project['tool.poetry']['version'])
     is_test = False
     if test_regex:
         if re.compile(test_regex).search(str(project_version)):
