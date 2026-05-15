@@ -11,6 +11,8 @@ from packaging.version import Version
 
 def get_public_version(project_name: str, is_test = False) -> Version:
     response = requests.get(f'https://{"test." if is_test else ""}pypi.org/pypi/{project_name}/json')
+    if response.status_code == 404:
+        return version.parse("0.0.0")
     response.raise_for_status()
     return version.parse(json.loads(response.content)['info']['version'])
 
