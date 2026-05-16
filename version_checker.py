@@ -11,6 +11,8 @@ from packaging.version import Version
 
 def get_public_version(project_name: str, is_test = False) -> Version:
     response = requests.get(f'https://{"test." if is_test else ""}pypi.org/pypi/{project_name}/json')
+    if response.status_code == 404:
+        return version.parse("0.0.0")
     response.raise_for_status()
     return version.parse(json.loads(response.content)['info']['version'])
 
@@ -21,12 +23,19 @@ if __name__ == '__main__':
     with open(pyproject_toml_path, 'rb') as f:
         project = tomli.load(f)
 
-    project_version = version.parse(project['tool']['poetry']['version'])
+    project_name = project.get('tool', {}).get('poetry', {}).get('name') or project.get('project', {}).get('name')
+    raw_version = project.get('tool', {}).get('poetry', {}).get('version') or project.get('project', {}).get('version')
+    if not project_name or not raw_version:
+        print("Could not find project name or version in pyproject.toml")
+        sys.exit(2)
+
+    project_version = version.parse(raw_version)
     is_test = False
     if test_regex:
         if re.compile(test_regex).search(str(project_version)):
             is_test = True
-    public_project_version = get_public_version(project['tool']['poetry']['name'], is_test)
+
+    public_project_version = get_public_version(project_name, is_test)
 
     if project_version > public_project_version:
         return_code = 0
